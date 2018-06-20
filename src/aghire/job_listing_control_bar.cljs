@@ -40,20 +40,20 @@
                 }
          (str (utl/unesc "&#x20E0;") ": " excluded-ct)])))
 
-#_(defn result-max []
+(defn result-max []
     (fn []
       [:div {:style (merge utl/hz-flex-wrap-centered {:margin-right "6px"})}
        [:span "Show:"]
-       (let [rmax (<sub [:job-display-max])]
+       (let [rmax @db/job-display-max
+             set-new-max (fn [event]
+                           (reset! db/job-display-max (js/parseInt (target-val event))))]
          [:input {:type         "number"
                   :defaultValue rmax
 
                   :on-key-press #(when (= "Enter" (js->clj (.-key %)))
-                                   (>evt [:set-result-display-max (js/parseInt (target-val %))]))
+                                   (set-new-max %))
 
-                  :on-blur      #(let [new (target-val %)]
-                                   #_(println "blur new" new (js/parseInt new))
-                                   (>evt [:set-result-display-max (js/parseInt new)]))
+                  :on-blur      #(set-new-max %)
 
                   :style        {:font-size    "1em"
                                  :max-width    "48px"
@@ -74,7 +74,7 @@
            (str "Jobs: " (count jobs)))]
 
         [excluded-count]]
-     ;;[result-max]
+     [result-max]
      [job-expansion-control]]))
 
 ;;; --- reframe plumbing ------------------------------------------------

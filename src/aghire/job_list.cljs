@@ -73,29 +73,6 @@
                     [:p (str "Unexpected node type = " (.-nodeType node))]))
              (:body job))))])))
 
-#_
-(defn job-details []
-  (fn [job]
-    (let [all-deets @db/show-job-details
-          deets (get all-deets (:hn-id job))]
-      (println :running-job-deets! all-deets (:show-job-details db/app)
-        (:hn-id job) deets)
-      [:div {:class (if deets "slideIn" "slideOut")
-             :style {:margin     "6px"
-                     :background "#fff"
-                     :display    (if deets "block" "none")}}
-       #_[unt/user-annotations job]
-       (into [:div {:style           {:margin   "6px"
-                                      :overflow "auto"}
-                    :on-double-click #(jump-to-hn (:hn-id job))}]
-         (when deets
-           (map (fn [node]
-                  (case (.-nodeType node)
-                    1 [:p (.-innerHTML node)]
-                    3 [:p (.-textContent node)]
-                    [:p (str "Unexpected node type = " (.-nodeType node))]))
-             (:body job))))])))
-
 (defn job-header []
   (fn [job]
     [:div {:style {:cursor  "pointer"
