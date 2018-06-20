@@ -16,7 +16,10 @@
               :rgx-xlate-or-and       true
               :search-history         {}
 
-              :show-job-details       {}})))
+              :show-job-details       {}
+
+              :job-memos {} ;; keyed by job hn-id
+              })))
 
 
 (def job-sort (r/cursor app [:job-sort]))
@@ -27,16 +30,9 @@
 (def rgx-match-case (r/cursor app [:rgx-match-case]))
 (def rgx-xlate-or-and (r/cursor app [:rgx-xlate-or-and]))
 (def rgx-unparsed (r/cursor app [:rgx-unparsed]))
+(def job-memos (r/cursor app [:job-memos]))
 
 (def search-history (r/cursor app [:search-history]))
 (def show-job-details (r/cursor app [:show-job-details]))
 
-;(rfr/reg-event-fx ::initialize-db
-;  [(rfr/inject-cofx :storage-user-notes)]
-;
-;  (fn [{:keys [storage-user-notes]} _]
-;    (merge
-;      {:db (assoc (initial-db) :user-notes storage-user-notes)}
-;      (when-let [initial-month (nth (loader/gMonthlies-cljs) js/initialSearchMoIdx)]
-;        {:dispatch [:month-set (:hnId initial-month)]}))))
-
+(def ls-key "rehiring-browser")                             ;; localstore key

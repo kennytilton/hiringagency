@@ -4,21 +4,21 @@
     [aghire.db :as db]
     ;[aghire.events :as evt]
     [aghire.filtering :as flt]
-    ;[aghire.user-annotations :as unt]
     [goog.string :as gs]
     [cljs.pprint :as pp]
-    [aghire.utility :refer [target-val] :as utl]
-    [aghire.month-loader :as loader]))
+    [aghire.utility :refer [<app-cursor target-val] :as utl]
+    [aghire.month-loader :as loader]
+    [aghire.user-annotations :refer [<memo-cursor] :as unt]))
 
 (declare job-header job-details)
 
 (defn job-list-sort [jobs]
   (let [{:keys [key-fn comp-fn order prep-fn]} @db/job-sort]
-      (sort (fn [j k]
-              (if comp-fn
-                (comp-fn order j k)
-                (* order (if (< (key-fn j) (key-fn k)) -1 1))))
-        (map (or prep-fn identity) jobs))))
+    (sort (fn [j k]
+            (if comp-fn
+              (comp-fn order j k)
+              (* order (if (< (key-fn j) (key-fn k)) -1 1))))
+      (map (or prep-fn identity) jobs))))
 
 (defn jump-to-hn [hn-id]
   (.open js/window (pp/cl-format nil "https://news.ycombinator.com/item?id=~a" hn-id) "_blank"))
@@ -26,17 +26,16 @@
 (defn job-list-item []
   (fn [job-no job]
     [:li {:style {:cursor     "pointer"
-                  :display    "block" #_(let [excluded (<sub [:unotes-prop (:hn-id job) :excluded])]
-                                          (if (and excluded
-                                                   (not (<sub [:show-filtered-excluded]))
-                                                   (not (<sub [:filter-active "Excluded"])))
-                                            "none" "block"))
+                  :display    (let [excluded (<memo-cursor job :excluded)]
+                                (if (and excluded
+                                         (not @db/show-filter-excluded)
+                                         (not (<app-cursor [:filter-active :excluded])))
+                                  "none" "block"))
                   :padding    "12px"
                   :background (if (zero? (mod job-no 2))
                                 "#eee" "#f8f8f8")}}
      [job-header job]
-     [job-details job]
-     ]))
+     [job-details job]]))
 
 (defn job-list []
   (fn []
@@ -48,18 +47,18 @@
                           :margin          0}}]
         (map (fn [jn j]
                ^{:key (:hn-id j)} [job-list-item jn j])
-          (range) ;; provides zebra
+          (range)                                           ;; provides zebra
           (job-list-sort
             (take @db/job-display-max @flt/jobs-filtered)))))))
 
 (defn job-details []
   (fn [job]
-    (let [deets @(r/cursor db/app [:show-job-details (:hn-id job)])]
+    (let [deets true]                                       ;; @(r/cursor db/app [:show-job-details (:hn-id job)])]
       [:div {:class (if deets "slideIn" "slideOut")
              :style {:margin     "6px"
                      :background "#fff"
                      :display    (if deets "block" "none")}}
-       #_[unt/user-annotations job]
+       [unt/user-annotations job]
        (into [:div {:style           {:margin   "6px"
                                       :overflow "auto"}
                     :on-double-click #(jump-to-hn (:hn-id job))}]

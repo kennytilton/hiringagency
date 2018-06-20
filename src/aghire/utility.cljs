@@ -3,7 +3,8 @@
     [goog.string :as gs]
     [reagent.core :as r]
     [clojure.string :as str]
-    [aghire.db :as db]))
+    [aghire.db :as db]
+    [cljs.reader :as reader]))
 
 (defn app-cursor [path]
   (r/cursor db/app (if (vector? path) path [path])))
@@ -13,6 +14,8 @@
 
 (defn <track [fn & path]
   @(apply r/track fn path))
+
+
 
 (defn slide-in-anime [show?]
   (if show? "slideIn" "slideOut"))
@@ -40,27 +43,25 @@
 
 ;;; --- local-store --------------------------------
 
-;(def ls-key "rehiring-browser")                             ;; localstore key
-;
-;(defn io-all-keys []
-;  (.keys js/Object (.-localStorage js/window)))
-;
-;(defn ls-get-wild
-;  "Loads all localStorage values whose key begins with
-;  prefix into a dictionary, using the rest of the LS key
-;   as the dictionary key."
-;  [prefix]
-;
-;  (into {}
-;    (remove nil?
-;      (for [lsk (io-all-keys)]
-;        (when (and (str/starts-with? lsk prefix)
-;                   ;; ugh, we got some garbage in LS
-;                   ;; may as well create permanent filter
-;                   (> (count lsk) (count prefix)))
-;          [(subs lsk (count prefix))                        ;; toss prefix
-;           (cljs.reader/read-string
-;             (.getItem js/localStorage lsk))])))))
+(defn io-all-keys []
+  (.keys js/Object (.-localStorage js/window)))
+
+(defn ls-get-wild
+  "Loads all localStorage values whose key begins with
+  prefix into a dictionary, using the rest of the LS key
+   as the dictionary key."
+  [prefix]
+
+  (into {}
+    (remove nil?
+      (for [lsk (io-all-keys)]
+        (when (and (str/starts-with? lsk prefix)
+                   ;; ugh, we got some garbage in LS
+                   ;; may as well create permanent filter
+                   (> (count lsk) (count prefix)))
+          [(subs lsk (count prefix))                        ;; toss prefix
+           (reader/read-string
+             (.getItem js/localStorage lsk))])))))
 
 (defn target-val [e]
   (.-value (.-target e)))
@@ -89,7 +90,7 @@
   (or (:company j) ""))
 
 ;(defn job-stars-enrich [job]
-;  (assoc job :stars (or (<sub [:unotes-prop (:hn-id job) :stars]) 0)))
+;  (assoc job :stars (or (<sub [:memo-prop (:hn-id job) :stars]) 0)))
 
 (defn job-stars-compare [dir j k]
   ;; force un-starred to end regardless of sort order

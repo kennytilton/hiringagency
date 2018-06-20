@@ -2,7 +2,8 @@
   (:require [reagent.core :as r]
             [aghire.utility :refer [target-val] :as utl]
             [aghire.db :as db]
-            [aghire.month-loader :as loader]))
+            [aghire.month-loader :as loader]
+            [aghire.filtering :as flt]))
 
 ;;; --- sub-components ---------------------------------------
 
@@ -23,20 +24,19 @@
        (if @toggle-all-details-expands
          "Expand all" "Collapse all")])))
 
-
-#_(defn excluded-count []
+(defn excluded-count []
     (fn []
-      (let [excluded-ct (<sub [:jobs-filtered-excluded-ct])]
+      (let [excluded-ct @flt/jobs-filtered-excluded-ct]
         [:span {:style    {:padding-bottom "4px"
                            :cursor         "pointer"
                            :display        "flex"
                            :align-items    "center"
                            :font-size      "1em"
                            :visibility     (if (pos? excluded-ct) "visible" "hidden")
-                           :border         (if (<sub [:show-filtered-excluded])
+                           :border         (if @db/show-filter-excluded
                                              "thin solid red" "none")
                            :title          "Show/hide items you have excluded"}
-                :on-click #(>evt [:show-filtered-excluded-toggle])
+                :on-click #(swap! db/show-filter-excluded not)
                 }
          (str (utl/unesc "&#x20E0;") ": " excluded-ct)])))
 
@@ -66,38 +66,14 @@
 (defn job-listing-control-bar []
   (fn []
     [:div.listingControlBar
-     #_[:div {:style utl/hz-flex-wrap-centered}
-        ;;; --- match count---------------------------------------------------
+     [:div {:style utl/hz-flex-wrap-centered}
         [:span {:style {:font-size    "1em"
                         :margin-right "12px"}}
-         (let [jobs (<sub [:jobs-filtered])]
+         (let [jobs @flt/jobs-filtered]
            (str "Jobs: " (count jobs)))]
 
         [excluded-count]]
      [result-max]
      [job-expansion-control]]))
 
-;;; --- reframe plumbing ------------------------------------------------
-;
 
-;(rfr/reg-sub :jobs-filtered-excluded-ct
-;  ;
-;  ; This is tricky. jobs-filtered includes excluded jobs (!) so we can let
-;  ; the user show/hide them while browsing a selection. Kinda like when
-;  ; we search gmail and it says "10 found, 3 more in trash". Sooo...
-;  ;
-;  ; This subscription provides the info needed to inform users
-;  ; how many jobs matched by their search are hidden
-;  ; because the user has excluded them.
-;  ;
-;  ;; signal fn
-;  (fn [query-v _]
-;    [(subscribe [:jobs-filtered])
-;     (subscribe [:user-notes])])
-
-;; compute
-;(fn [[jobs-filtered user-notes]]
-;  #_(println :jfilex-sees (count jobs-filtered) (count user-notes))
-;  (count (filter (fn [j]
-;                   (get-in user-notes [(:hn-id j) :excluded]))
-;           jobs-filtered))) )

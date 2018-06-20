@@ -1,11 +1,12 @@
 (ns aghire.core
-    (:require
-      [reagent.core :as r]
-      [aghire.utility :as utl]
-      [aghire.month-loader :as mld]
-      [aghire.month-loader-views :as mlv]
-      [aghire.control-panel :as cp]
-      [aghire.job-list :as jlst]))
+  (:require
+    [reagent.core :as r]
+    [aghire.utility :as utl]
+    [aghire.month-loader :as mld]
+    [aghire.month-loader-views :as mlv]
+    [aghire.control-panel :as cp]
+    [aghire.job-list :as jlst]
+    [aghire.user-annotations :as unt]))
 
 ;; -------------------------
 ;; Landing-page
@@ -59,4 +60,5 @@
 (defn init! []
   (utl/sort-initialize)
   (mld/month-initialize)
+  (unt/job-memos-load)
   (mount-root))

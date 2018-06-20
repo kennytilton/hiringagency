@@ -14,15 +14,15 @@
         full-rgx-tree @(r/track rgx/rgx-tree-build :full)]
 
     (filter (fn [j]
-              (let [unotes nil #_(get user-notes (:hn-id j))]
+              (let [memo (<app-cursor [:job-memos (:hn-id j)])]
                 (and (or (not (get filters "REMOTE")) (:remote j))
                      (or (not (get filters "ONSITE")) (:onsite j))
                      (or (not (get filters "INTERNS")) (:interns j))
                      (or (not (get filters "VISA")) (:visa j))
-                     ;(or (not (get filters "Excluded")) (:excluded unotes))
-                     ;(or (not (get filters "Noted")) (pos? (count (:notes unotes))))
-                     ;(or (not (get filters "Applied")) (:applied unotes))
-                     ;(or (not (get filters "Starred")) (pos? (:stars unotes)))
+                     (or (not (get filters "Excluded")) (:excluded memo))
+                     (or (not (get filters "Noted")) (pos? (count (:notes memo))))
+                     (or (not (get filters "Applied")) (:applied memo))
+                     (or (not (get filters "Starred")) (pos? (:stars memo)))
                      (or (not title-rgx-tree) (rgx/rgx-tree-match (:title-search j) title-rgx-tree))
                      (or (not full-rgx-tree) (or
                                                (rgx/rgx-tree-match (:title-search j) full-rgx-tree)
@@ -30,6 +30,17 @@
       @loader/month-jobs)))
 
 (def jobs-filtered (r/track jobs-filtered-fn))
+
+;;; --- filtered excluded count ----------------------------------------------------
+
+(defn jobs-filtered-excluded-ct-compute []
+  (let [memos @db/job-memos
+        jobs-filtered @jobs-filtered]
+    (count (filter (fn [j]
+                     (get-in memos [(:hn-id j) :excluded]))
+             jobs-filtered))))
+
+(def jobs-filtered-excluded-ct (r/track jobs-filtered-excluded-ct-compute))
 
 ;;; --- the filtering interface ------------------------------------------------------
 
