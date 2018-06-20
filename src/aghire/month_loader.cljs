@@ -118,13 +118,13 @@
 ;;; --- dev-time limits -----------------------------
 ;;; n.b.: these will be limits *per page*
 
-(def ATHING-PARSE-MAX 80)
+(def ATHING-PARSE-MAX 80) ;;todo make bigger
 
 (defn job-page-athings
   "Pretty simple. All messages are dom nodes with class aThing. Grab those
   and later we will check the opening text vertical bars | to identify jobs.
 
-  Don't judge me."
+  Counting vertical bars to identify a job? Don't judge me."
   [ifr-dom]
 
   (when-let [cont-doc (.-contentDocument ifr-dom)]
@@ -156,14 +156,12 @@
 
 (defn cull-jobs-from-athings []
   (let [{:keys [phase athings athing-parse-ct jobs jobs-seen] :as task} @month-load]
-    (println :cull-job-bam! phase (count athings) (count jobs))
     (when (= :parse-jobs phase)
       (let [chunk (take ATHING_CHUNK_SZ athings)
             rem-athings (nthrest athings ATHING_CHUNK_SZ)]
         (if (seq chunk)
           ;; todo switch to keep
           (let [new-jobs (filter #(:OK %) (map #(parse/job-parse % jobs-seen) chunk))]
-            (println :new-jobs (count new-jobs))
             (reset! month-load
               (merge task {
                            :jobs            (into jobs new-jobs)

@@ -1,16 +1,17 @@
 (ns aghire.filtering
   (:require
-
+    [reagent.core :as r]
     [aghire.month-loader :as loader]
-    [aghire.utility :refer [<app-cursor] :as utl]
+    [aghire.utility :refer [<app-cursor ] :as utl]
     [aghire.db :as db]
-    [reagent.core  :as r]
-    [reagent.core :as r]))
+    [aghire.regex-search :as rgx]))
 
 ;;; --- the filtering ----------------------------------------------------------------
 
 (defn jobs-filtered-fn []
-  (let [filters (<app-cursor :filter-active)]
+  (let [filters (<app-cursor :filter-active)
+        title-rgx-tree @(r/track rgx/rgx-tree-build :title)
+        full-rgx-tree @(r/track rgx/rgx-tree-build :full)]
 
     (filter (fn [j]
               (let [unotes nil #_(get user-notes (:hn-id j))]
@@ -22,11 +23,10 @@
                      ;(or (not (get filters "Noted")) (pos? (count (:notes unotes))))
                      ;(or (not (get filters "Applied")) (:applied unotes))
                      ;(or (not (get filters "Starred")) (pos? (:stars unotes)))
-                     ;(or (not title-rgx-tree) (rgx-tree-match (:title-search j) title-rgx-tree))
-                     ;(or (not full-rgx-tree) (or
-                     ;                          (rgx-tree-match (:title-search j) full-rgx-tree)
-                     ;                          (rgx-tree-match (:body-search j) full-rgx-tree)))
-                     )))
+                     (or (not title-rgx-tree) (rgx/rgx-tree-match (:title-search j) title-rgx-tree))
+                     (or (not full-rgx-tree) (or
+                                               (rgx/rgx-tree-match (:title-search j) full-rgx-tree)
+                                               (rgx/rgx-tree-match (:body-search j) full-rgx-tree))))))
       @loader/month-jobs)))
 
 (def jobs-filtered (r/track jobs-filtered-fn))

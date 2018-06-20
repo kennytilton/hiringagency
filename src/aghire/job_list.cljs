@@ -41,18 +41,16 @@
 (defn job-list []
   (fn []
     (when (loader/month-load-fini)
-      (println :job-list-sees @db/job-display-max (count @loader/month-jobs))
       (into [:ul {:style {:list-style-type "none"
                           :background      "#eee"
                           ;; these next defeat gratuitous default styling of ULs by browser
                           :padding         0
                           :margin          0}}]
-        (doall (map (fn [jn j]
-                      [job-list-item jn j])
-                 (range)
-                 (job-list-sort
-                   (take @db/job-display-max @flt/jobs-filtered))))))))
-
+        (map (fn [jn j]
+               ^{:key (:hn-id j)} [job-list-item jn j])
+          (range) ;; provides zebra
+          (job-list-sort
+            (take @db/job-display-max @flt/jobs-filtered)))))))
 
 (defn job-details []
   (fn [job]

@@ -11,6 +11,9 @@
 (defn <app-cursor [path]
   @(app-cursor path))
 
+(defn <track [fn & path]
+  @(apply r/track fn path))
+
 (defn slide-in-anime [show?]
   (if show? "slideIn" "slideOut"))
 

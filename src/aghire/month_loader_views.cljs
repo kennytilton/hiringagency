@@ -36,7 +36,6 @@
 
   (fn []
     (let [[phase max progress] @loader/month-progress]
-      (println :progbar-sees-phase phase max progress)
 
       [:div {:hidden (= phase :fini)}
        [:span
