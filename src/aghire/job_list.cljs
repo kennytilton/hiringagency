@@ -50,8 +50,8 @@
         (doall (map (fn [jn j]
                       [job-list-item jn j])
                  (range)
-                 (job-list-sort (take @db/job-display-max
-                   @loader/month-jobs))))))))
+                 (job-list-sort
+                   (take @db/job-display-max @flt/jobs-filtered))))))))
 
 
 (defn job-details []
