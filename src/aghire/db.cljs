@@ -1,14 +1,13 @@
 (ns aghire.db
   (:require [clojure.string :as str]
-            [reagent.core :as r]
-            [aghire.utility :as utl]
-            ))
+            [reagent.core :as r]))
 
 (def app (r/atom
            (merge
              {:month-load nil
               :job-display-max        42
-              :job-sort               (nth utl/job-sorts 0)
+              :job-sort               nil
+              :filter-active {}
               :show-filters           true
               :show-filtered-excluded false
               :rgx-match-case         false
@@ -19,6 +18,7 @@
 
 (def job-sort (r/cursor app [:job-sort]))
 (def job-display-max (r/cursor app [:job-display-max]))
+(def filter-active (r/cursor app [:filter-active]))
 (def show-filters (r/cursor app [:show-filters]))
 (def show-filter-excluded (r/cursor app [:show-filter-excluded]))
 (def rgx-match-case (r/cursor app [:rgx-match-case]))

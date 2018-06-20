@@ -57,5 +57,6 @@
   (r/render [main-panel] (.getElementById js/document "app")))
 
 (defn init! []
+  (utl/sort-initialize)
   (mld/month-initialize)
   (mount-root))

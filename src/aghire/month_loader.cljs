@@ -86,7 +86,7 @@
 (def month-progress (r/track month-progress-compute))
 
 (defn month-initialize []
-  (swap! db/app assoc-in [:month-load]
+  (reset! month-load
     (unprocessed-month
       (:hnId (nth (gMonthlies-cljs)
                js/initialSearchMoIdx)))))

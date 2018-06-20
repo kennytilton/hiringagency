@@ -79,17 +79,7 @@
 
 ;;; --- reframe plumbing ------------------------------------------------
 ;
-;(rfr/reg-event-db :toggle-details-visibility-all
-;  (fn [db [_ jobs]]
-;    (println :toggle-details-visibility-all (count jobs))
-;    (let [new-deets (into {} (for [hn-id (map :hn-id jobs)]
-;                               [hn-id (= "expand" (:toggle-all-details-expans db))]))]
-;
-;      (merge db {:toggle-all-details-expans (case (:toggle-all-details-expans db)
-;                                          "collapse" "expand"
-;                                          "expand" "collapse")
-;                 :show-job-details      new-deets}))))
-;
+
 ;(rfr/reg-sub :jobs-filtered-excluded-ct
 ;  ;
 ;  ; This is tricky. jobs-filtered includes excluded jobs (!) so we can let

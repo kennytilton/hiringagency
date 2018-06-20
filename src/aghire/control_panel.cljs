@@ -42,7 +42,8 @@
 (defn control-panel []
   (fn []
     [:div {:style {:background "#ffb57d"}}
-     #_ [utl/open-shut-case :show-filters "Filters"
+
+     [utl/open-shut-case :show-filters "Filters"
       flt/mk-title-selects
       flt/mk-user-selects]
 
