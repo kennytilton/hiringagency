@@ -4,6 +4,7 @@
       [aghire.utility :as utl]
       [aghire.month-loader :as mld]
       [aghire.month-loader-views :as mlv]
+      [aghire.control-panel :as cp]
       [aghire.job-list :as jlst]))
 
 ;; -------------------------
@@ -46,6 +47,7 @@
     ;; all the months and not restricting search by month boundary.
     [mlv/pick-a-month]
     [mld/job-listing-loader]
+    [cp/control-panel]
     [jlst/job-list]]])
 
 ;; -------------------------

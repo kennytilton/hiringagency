@@ -118,7 +118,7 @@
 ;;; --- dev-time limits -----------------------------
 ;;; n.b.: these will be limits *per page*
 
-(def ATHING-PARSE-MAX 1000)
+(def ATHING-PARSE-MAX 40)
 
 (defn job-page-athings
   "Pretty simple. All messages are dom nodes with class aThing. Grab those

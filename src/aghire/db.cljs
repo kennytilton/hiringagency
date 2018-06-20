@@ -7,8 +7,6 @@
 (def app (r/atom
            (merge
              {:month-load nil
-              :job-collapse-all       false
-              :toggle-details-action  "expand"
               :job-display-max        42
               :job-sort               (nth utl/job-sorts 0)
               :show-filters           true
@@ -18,9 +16,8 @@
               :search-history         {}
               :show-job-details       {}})))
 
+
 (def job-sort (r/cursor app [:job-sort]))
-(def job-collapse-all (r/cursor app [:job-collapse-all]))
-(def toggle-details-action (r/cursor app [:toggle-details-action]))
 (def job-display-max (r/cursor app [:job-display-max]))
 (def show-filters (r/cursor app [:show-filters]))
 (def show-filter-excluded (r/cursor app [:show-filter-excluded]))
