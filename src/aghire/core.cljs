@@ -3,7 +3,8 @@
       [reagent.core :as r]
       [aghire.utility :as utl]
       [aghire.month-loader :as mld]
-      [aghire.month-loader-views :as mlv]))
+      [aghire.month-loader-views :as mlv]
+      [aghire.job-list :as jlst]))
 
 ;; -------------------------
 ;; Landing-page
@@ -44,7 +45,8 @@
     ;; a couple of earlier months. Left as an exercise is loading
     ;; all the months and not restricting search by month boundary.
     [mlv/pick-a-month]
-    [mld/job-listing-loader]]])
+    [mld/job-listing-loader]
+    [jlst/job-list]]])
 
 ;; -------------------------
 ;; Initialize app

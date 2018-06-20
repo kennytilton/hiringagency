@@ -2,6 +2,7 @@
   (:require [clojure.walk :as walk]
             [cljs.pprint :as pp]
             [aghire.db :as db]
+            [aghire.job-parse :as parse]
             [reagent.core :as r]
             [aghire.utility :as utl]))
 
@@ -52,22 +53,33 @@
   [month-hn-id]
 
   (let [urls (month-page-urls month-hn-id)]
-    {:month-hn-id          month-hn-id
-     :phase                :cull-athings                    ;; ... :parse-jobs, :fini
-     :page-url-count       (count urls)
-     :page-urls-remaining  urls
-     :jobs-seen            #{}
-     :athings              []
-     :jobs                 []}))
+    {:month-hn-id         month-hn-id
+     :phase               :cull-athings                     ;; ... :parse-jobs, :fini
+     :page-url-count      (count urls)
+     :page-urls-remaining urls
+     :jobs-seen           #{}
+     :athings             []
+     :athing-parse-count  0
+     :jobs                []}))
 
 (def month-load (r/cursor db/app [:month-load]))
 
+(def month-id (r/cursor month-load [:month-hn-id]))
+(def month-phase (r/cursor month-load [:phase]))
+(def month-jobs (r/cursor month-load [:jobs]))
+(defn month-load-fini [] (= :fini @month-phase))
+
+
+
 (defn month-progress-compute []
-  (let [{:keys [phase page-url-count page-urls-remaining athings jobs]} (:month-load @db/app)]
+  (let [{:keys [phase page-url-count page-urls-remaining athings athing-parse-ct jobs]} (:month-load @db/app)]
     (into [(or phase :inactive)]
       (case phase
         :cull-athings [page-url-count (- page-url-count (count page-urls-remaining))]
-        :parse-jobs [(count athings) (count jobs)]
+
+        ;; todo next is wrong;  need to track athings parsed
+        :parse-jobs [(count athings) athing-parse-ct]
+        :fini [1 1]                                         ;; disappears anyway
         :inactive [0 0]
         (throw (str "bad phase " phase))))))
 
@@ -95,7 +107,7 @@
   Left as an exercise."
   []
   (fn []
-    [:div {:style {:display "block"}}
+    [:div {:style {:display "none"}}
      (let [task @month-load]
        (when (seq (:page-urls-remaining task))
          (println :mk-pg-loader-for (:page-urls-remaining task))
@@ -125,16 +137,43 @@
   (fn [task]
     (assert (first (:page-urls-remaining task)))
     [:iframe {:src     (first (:page-urls-remaining task))
-              :on-load #(do
+              :on-load #(let [rem-pages (rest (:page-urls-remaining task))]
+                          (reset! month-load
+                            (merge task {
+                                         :athings             (into (:athings task)
+                                                                (job-page-athings (.-target %)))
+                                         :page-urls-remaining rem-pages
+                                         :phase               (if (empty? rem-pages)
+                                                                :parse-jobs
+                                                                (:phase task))}))
 
-                          (swap! month-load update :athings concat (job-page-athings (.-target %)))
-                          (swap! month-load update :page-urls-remaining rest)
-
-                          #_
-                          (utl/update-multi @month-load
-                          [:page-urls-remaining rest]
-                          [:athings concat (job-page-athings (.-target %))])
                           (let [t2 (:month-load @db/app)]
                             (println :bam (:phase t2)
                               (count (:athings t2))
                               (count (:page-urls-remaining t2)))))}]))
+
+(def ATHING_CHUNK_SZ 100)                                   ;; bigger chunks zoom due, so use small value to see progress bar working
+
+(defn cull-jobs-from-athings []
+  (let [{:keys [phase athings athing-parse-ct jobs jobs-seen] :as task} @month-load]
+    (println :cull-job-bam! phase (count athings) (count jobs))
+    (when (= :parse-jobs phase)
+      (let [chunk (take ATHING_CHUNK_SZ athings)
+            rem-athings (nthrest athings ATHING_CHUNK_SZ)]
+        (if (seq chunk)
+          ;; todo switch to keep
+          (let [new-jobs (filter #(:OK %) (map #(parse/job-parse % jobs-seen) chunk))]
+            (println :new-jobs (count new-jobs))
+            (reset! month-load
+              (merge task {
+                           :jobs            (into jobs new-jobs)
+                           :jobs-seen       (when (seq rem-athings)
+                                              (clojure.set/union jobs-seen (into #{} (map :hn-id new-jobs))))
+                           :athings         rem-athings
+                           :athing-parse-ct (+ athing-parse-ct (count chunk))
+                           :phase           (if (empty? rem-athings)
+                                              :fini
+                                              phase)})))
+          (swap! month-load update :phase :fini))))))
+
+(defonce athings-to-jobs (r/track! cull-jobs-from-athings))
