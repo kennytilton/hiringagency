@@ -146,12 +146,7 @@
                                          :page-urls-remaining rem-pages
                                          :phase               (if (empty? rem-pages)
                                                                 :parse-jobs
-                                                                (:phase task))}))
-
-                          (let [t2 (:month-load @db/app)]
-                            (println :bam (:phase t2)
-                              (count (:athings t2))
-                              (count (:page-urls-remaining t2)))))}]))
+                                                                (:phase task))})))}]))
 
 (def ATHING_CHUNK_SZ 20)                                    ;; bigger chunks zoom due, so use small value to see progress bar working
 

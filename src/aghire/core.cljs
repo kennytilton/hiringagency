@@ -2,6 +2,7 @@
   (:require
     [reagent.core :as r]
     [aghire.utility :as utl]
+    [aghire.sorting :as sort]
     [aghire.month-loader :as mld]
     [aghire.month-loader-views :as mlv]
     [aghire.control-panel :as cp]
@@ -58,7 +59,7 @@
   (r/render [main-panel] (.getElementById js/document "app")))
 
 (defn init! []
-  (utl/sort-initialize)
+  (sort/sort-initialize)
   (mld/month-initialize)
   (unt/job-memos-load)
   (mount-root))

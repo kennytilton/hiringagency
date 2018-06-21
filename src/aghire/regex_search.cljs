@@ -59,13 +59,9 @@
                         "help"]])
        [utl/help-list regexHelpEntry helping]])))
 
-(defn push-new [coll x]
-  (if (some #{x} coll)
-    coll (conj coll x)))
-
 (defn unparsed-set [scope raw]
   (swap! db/rgx-unparsed assoc-in [scope] raw)
-  (swap! db/search-history update-in [scope] push-new raw))
+  (swap! db/search-history update-in [scope] utl/push-new raw))
 
 (defn- de-aliased [scope]
   (when-let [rgx-raw (get @db/rgx-unparsed scope)]
