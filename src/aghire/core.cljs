@@ -5,7 +5,7 @@
     [aghire.sorting :as sort]
     [aghire.month-loader :as mld]
     [aghire.month-loader-ui :as mlv]
-    [aghire.control-panel :as cp]
+
     [aghire.job-list :as jlst]
     [aghire.memo :as unt]
     [aghire.job-list-control-bar :as jlcb]
