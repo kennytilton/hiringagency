@@ -1,4 +1,4 @@
-(ns aghire.job-listing-control-bar
+(ns aghire.job-list-control-bar
   (:require [reagent.core :as r]
             [aghire.utility :refer [target-val] :as utl]
             [aghire.db :as db]

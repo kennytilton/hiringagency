@@ -1,4 +1,4 @@
-(ns aghire.user-annotations
+(ns aghire.memo
   (:require
     [cljs.reader :as reader]
     [goog.string :as gs]

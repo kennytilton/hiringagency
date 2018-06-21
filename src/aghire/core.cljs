@@ -4,10 +4,13 @@
     [aghire.utility :as utl]
     [aghire.sorting :as sort]
     [aghire.month-loader :as mld]
-    [aghire.month-loader-views :as mlv]
+    [aghire.month-loader-ui :as mlv]
     [aghire.control-panel :as cp]
     [aghire.job-list :as jlst]
-    [aghire.user-annotations :as unt]))
+    [aghire.memo :as unt]
+    [aghire.job-list-control-bar :as jlcb]
+    [aghire.regex-ui :as rgxui]
+    [aghire.filtering :as flt]))
 
 ;; -------------------------
 ;; Landing-page
@@ -44,12 +47,28 @@
   [:div
    [app-banner]
    [:div {:style {:margin 0 :background "#ffb57d"}}
+
     ;; we default to the current month and let user explore
     ;; a couple of earlier months. Left as an exercise is loading
     ;; all the months and not restricting search by month boundary.
     [mlv/pick-a-month]
+
+    ;; a hidden iframe used to load HN pages for scraping
     [mld/job-listing-loader]
-    [cp/control-panel]
+
+    ;; the control panel
+    [:div {:style {:background "#ffb57d"}}
+     [utl/open-shut-case :show-filters "Filters"
+      flt/mk-title-selects
+      flt/mk-user-selects]
+
+     [rgxui/mk-regex-search]
+
+     [sort/sort-bar]
+
+     [jlcb/job-listing-control-bar]]
+
+    ;; the jobs...
     [jlst/job-list]]])
 
 ;; -------------------------

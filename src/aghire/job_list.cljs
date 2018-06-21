@@ -8,7 +8,7 @@
     [cljs.pprint :as pp]
     [aghire.utility :refer [<app-cursor app-cursor target-val] :as utl]
     [aghire.month-loader :as loader]
-    [aghire.user-annotations :refer [<memo-cursor] :as unt]))
+    [aghire.memo :refer [<memo-cursor] :as unt]))
 
 (declare job-header job-details)
 

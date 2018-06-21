@@ -1,4 +1,4 @@
-(ns aghire.month-loader-views
+(ns aghire.month-loader-ui
   (:require
     [aghire.utility :refer [target-val] :as utl]
 
