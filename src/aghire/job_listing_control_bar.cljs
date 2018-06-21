@@ -14,13 +14,10 @@
                            :min-width "128px"}
                 :on-click #(let [expand? @toggle-all-details-expands
                                  jobs @loader/month-jobs]
-                             (println :setting-all-deetshow expand? (count jobs))
                              (swap! toggle-all-details-expands not)
-                             (let [newdeets (into {} (for [j jobs]
-                                                  [(:hn-id j) expand?]))]
-                               (println :newdeets newdeets)
-                               (reset! db/show-job-details
-                                 newdeets)))}
+                             (reset! db/show-job-details
+                               (into {} (for [j jobs]
+                                          [(:hn-id j) expand?]))))}
        (if @toggle-all-details-expands
          "Expand all" "Collapse all")])))
 

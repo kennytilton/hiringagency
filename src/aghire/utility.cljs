@@ -89,8 +89,8 @@
 (defn job-company-key [j]
   (or (:company j) ""))
 
-;(defn job-stars-enrich [job]
-;  (assoc job :stars (or (<sub [:memo-prop (:hn-id job) :stars]) 0)))
+(defn job-stars-enrich [job]
+  (assoc job :stars (or (<app-cursor [:job-memos (:hn-id job) :stars]) 0)))
 
 (defn job-stars-compare [dir j k]
   ;; force un-starred to end regardless of sort order
@@ -113,7 +113,7 @@
       r)))
 
 (def job-sorts [{:title "Creation" :key-fn :hn-id :order -1}
-                ;{:title "Stars" :comp-fn job-stars-compare :order -1 :prep-fn job-stars-enrich}
+                {:title "Stars" :comp-fn job-stars-compare :order -1 :prep-fn job-stars-enrich}
                 {:title "Company" :key-fn job-company-key :order 1}])
 
 (defn sort-initialize []
