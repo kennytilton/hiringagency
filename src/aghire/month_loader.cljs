@@ -82,13 +82,15 @@
 
 (def month-progress (r/track month-progress-compute))
 
-(defn month-initialize []
+(defn month-load-initialize [month-hn-id]
   (reset! month-load
     (unprocessed-month
-      (:hnId (nth (gMonthlies-cljs)
-               js/initialSearchMoIdx)))))
+      month-hn-id)))
 
-
+(defn app-month-startup []
+  (month-load-initialize
+    (:hnId (nth (gMonthlies-cljs)
+             js/initialSearchMoIdx))))
 
 (declare mk-page-loader job-page-athings)
 

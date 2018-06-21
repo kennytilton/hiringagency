@@ -10,7 +10,7 @@
 (defn month-selector []
   (into [:select.searchMonth
          {:value     (or @loader/month-id "")
-          :on-change #(reset! loader/month-id (utl/target-val %))}]
+          :on-change #(loader/month-load-initialize (utl/target-val %))}]
     (map #(let [{:keys [hnId desc]} %]
             [:option {:value hnId} desc])
       (loader/gMonthlies-cljs))))

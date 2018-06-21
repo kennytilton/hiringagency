@@ -79,6 +79,7 @@
 
 (defn init! []
   (sort/sort-initialize)
-  (mld/month-initialize)
   (unt/job-memos-load)
+  (mld/app-month-startup)
+
   (mount-root))
