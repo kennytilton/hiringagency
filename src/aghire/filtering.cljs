@@ -2,11 +2,11 @@
   (:require
     [reagent.core :as r]
     [aghire.month-loader :as loader]
-    [aghire.utility :refer [<app-cursor ] :as utl]
+    [aghire.utility :refer [<app-cursor app-cursor] :as utl]
     [aghire.db :as db]
     [aghire.regex-search :as rgx]))
 
-;;; --- the filtering ----------------------------------------------------------------
+;;; --- the filtering itself! ----------------------------------------------------------------
 
 (defn jobs-filtered-fn []
   (let [filters (<app-cursor :filter-active)
@@ -32,6 +32,9 @@
 (def jobs-filtered (r/track jobs-filtered-fn))
 
 ;;; --- filtered excluded count ----------------------------------------------------
+;;; This is funny, all we need is the count but it is a fairly elaborate computation
+;;; so having it in-line could be a bear, so we use an r/track to hide/memoize it all
+;;; but use it just once.
 
 (defn jobs-filtered-excluded-ct-compute []
   (let [memos @db/job-memos
@@ -42,12 +45,32 @@
 
 (def jobs-filtered-excluded-ct (r/track jobs-filtered-excluded-ct-compute))
 
-;;; --- the filtering interface ------------------------------------------------------
+;;; --- the filtering interface (excluding regex) -----------------------
 
-(defn mk-job-selects [key lbl j-major-selects styling]
+(def title-selects [[["REMOTE", "Does regex search of title for remote jobs"]
+                     ["ONSITE", "Does regex search of title for on-site jobs"]]
+                    [["INTERNS", "Does regex search of title for internships"]
+                     ["VISA", "Does regex search of title for Visa sponsors"]]])
+
+(def user-selects [[["Starred", "Show only jobs you have rated with stars"]
+                    ["Noted", "Show only jobs on which you have made a note"]]
+                   [["Applied", "Show only jobs you have marked as applied to"]
+                    ["Excluded", "Show jobs you exluded from view"]]])
+
+(declare mk-filter-grid)
+
+(defn mk-title-selects []
+  (mk-filter-grid "title" "Title selects" title-selects {}))
+
+(defn mk-user-selects []
+  (mk-filter-grid "user" "User selects" user-selects {}))
+
+(defn mk-filter-grid
+  "A generic interface builder capabale of presenting N rows of N checkboxes"
+  [key lbl j-major-selects styling]
   (let [f-style (merge utl/hz-flex-wrap {:margin "8px 0 8px 24px"} styling)
-        mk-job-select (fn [[tag desc]]
-                        (let [f-active (r/cursor db/app [:filter-active tag])]
+        mk-filter-checkbox (fn [[tag desc]]
+                        (let [f-active (app-cursor [:filter-active tag])]
                           [:div {:style {:color       "white"
                                          :min-width   "96px"
                                          :display     "flex"
@@ -67,21 +90,5 @@
       (map (fn [j-selects]
              (into [:div {:style {:display "flex"
                                   :flex    "no-wrap"}}]
-               (map mk-job-select j-selects)))
+               (map mk-filter-checkbox j-selects)))
         j-major-selects))))
-
-(def title-selects [[["REMOTE", "Does regex search of title for remote jobs"]
-                     ["ONSITE", "Does regex search of title for on-site jobs"]]
-                    [["INTERNS", "Does regex search of title for internships"]
-                     ["VISA", "Does regex search of title for Visa sponsors"]]])
-
-(def user-selects [[["Starred", "Show only jobs you have rated with stars"]
-                    ["Noted", "Show only jobs on which you have made a note"]]
-                   [["Applied", "Show only jobs you have marked as applied to"]
-                    ["Excluded", "Show jobs you exluded from view"]]])
-
-(defn mk-title-selects []
-  (mk-job-selects "title" "Title selects" title-selects {}))
-
-(defn mk-user-selects []
-  (mk-job-selects "user" "User selects" user-selects {}))

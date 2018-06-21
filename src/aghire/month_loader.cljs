@@ -4,7 +4,7 @@
             [aghire.db :as db]
             [aghire.job-parse :as parse]
             [reagent.core :as r]
-            [aghire.utility :as utl]))
+            [aghire.utility :refer [app-cursor] :as utl]))
 
 (defn gMonthlies-cljs
   "The gMonthlies table of contents is defined in index.html for extensibility,
@@ -62,14 +62,12 @@
      :athing-parse-count  0
      :jobs                []}))
 
-(def month-load (r/cursor db/app [:month-load]))
+(def month-load (app-cursor [:month-load]))
 
 (def month-id (r/cursor month-load [:month-hn-id]))
 (def month-phase (r/cursor month-load [:phase]))
 (def month-jobs (r/cursor month-load [:jobs]))
 (defn month-load-fini [] (= :fini @month-phase))
-
-
 
 (defn month-progress-compute []
   (let [{:keys [phase page-url-count page-urls-remaining athings athing-parse-ct jobs]} (:month-load @db/app)]
