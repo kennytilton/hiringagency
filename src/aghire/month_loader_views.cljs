@@ -35,7 +35,8 @@
 (defn month-load-progress-bar []
 
   (fn []
-    (let [[phase max progress] @loader/month-progress]
+    (let [;; load @loader/athings-to-jobs
+          [phase max progress] @loader/month-progress]
 
       [:div {:hidden (= phase :fini)}
        [:span

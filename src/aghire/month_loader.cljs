@@ -73,11 +73,10 @@
 
 (defn month-progress-compute []
   (let [{:keys [phase page-url-count page-urls-remaining athings athing-parse-ct jobs]} (:month-load @db/app)]
+    ;;(prn :progcomp phase athing-parse-ct (count jobs))
     (into [(or phase :inactive)]
       (case phase
         :cull-athings [page-url-count (- page-url-count (count page-urls-remaining))]
-
-        ;; todo next is wrong;  need to track athings parsed
         :parse-jobs [(count athings) athing-parse-ct]
         :fini [1 1]                                         ;; disappears anyway
         :inactive [0 0]
@@ -120,7 +119,7 @@
 ;;; --- dev-time limits -----------------------------
 ;;; n.b.: these will be limits *per page*
 
-(def ATHING-PARSE-MAX 80) ;;todo make bigger
+(def ATHING-PARSE-MAX 1000)                                 ;;todo make bigger
 
 (defn job-page-athings
   "Pretty simple. All messages are dom nodes with class aThing. Grab those
@@ -154,7 +153,7 @@
                               (count (:athings t2))
                               (count (:page-urls-remaining t2)))))}]))
 
-(def ATHING_CHUNK_SZ 100)                                   ;; bigger chunks zoom due, so use small value to see progress bar working
+(def ATHING_CHUNK_SZ 20)                                    ;; bigger chunks zoom due, so use small value to see progress bar working
 
 (defn cull-jobs-from-athings []
   (let [{:keys [phase athings athing-parse-ct jobs jobs-seen] :as task} @month-load]
@@ -162,18 +161,19 @@
       (let [chunk (take ATHING_CHUNK_SZ athings)
             rem-athings (nthrest athings ATHING_CHUNK_SZ)]
         (if (seq chunk)
-          ;; todo switch to keep
           (let [new-jobs (filter #(:OK %) (map #(parse/job-parse % jobs-seen) chunk))]
-            (reset! month-load
-              (merge task {
-                           :jobs            (into jobs new-jobs)
-                           :jobs-seen       (when (seq rem-athings)
-                                              (clojure.set/union jobs-seen (into #{} (map :hn-id new-jobs))))
-                           :athings         rem-athings
-                           :athing-parse-ct (+ athing-parse-ct (count chunk))
-                           :phase           (if (empty? rem-athings)
-                                              :fini
-                                              phase)})))
+            (js/setTimeout
+              #(reset! month-load
+                 (merge task {
+                              :jobs            (into jobs new-jobs)
+                              :jobs-seen       (when (seq rem-athings)
+                                                 (clojure.set/union jobs-seen (into #{} (map :hn-id new-jobs))))
+                              :athings         rem-athings
+                              :athing-parse-ct (+ athing-parse-ct (count chunk))
+                              :phase           (if (empty? rem-athings)
+                                                 :fini
+                                                 phase)}))
+              0))
           (swap! month-load update :phase :fini))))))
 
 (defonce athings-to-jobs (r/track! cull-jobs-from-athings))

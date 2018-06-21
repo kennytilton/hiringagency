@@ -6,7 +6,7 @@
     [aghire.filtering :as flt]
     [goog.string :as gs]
     [cljs.pprint :as pp]
-    [aghire.utility :refer [<app-cursor target-val] :as utl]
+    [aghire.utility :refer [<app-cursor app-cursor target-val] :as utl]
     [aghire.month-loader :as loader]
     [aghire.user-annotations :refer [<memo-cursor] :as unt]))
 
@@ -53,7 +53,7 @@
 
 (defn job-details []
   (fn [job]
-    (let [deets true]                                       ;; @(r/cursor db/app [:show-job-details (:hn-id job)])]
+    (let [deets (<app-cursor [:show-job-details (:hn-id job)])]
       [:div {:class (if deets "slideIn" "slideOut")
              :style {:margin     "6px"
                      :background "#fff"
@@ -74,7 +74,7 @@
   (fn [job]
     [:div {:style {:cursor  "pointer"
                    :display "flex"}
-           ;; :on-click #(>evt [::evt/toggle-show-job-details (:hn-id job)])
+           :on-click #(swap! (app-cursor [:show-job-details (:hn-id job)]) not)
            }
      [:span {:style {:color        "gray"
                      :max-height   "16px"
