@@ -78,7 +78,8 @@
         :parse-jobs [(count athings) athing-parse-ct]
         :fini [1 1]                                         ;; disappears anyway
         :inactive [0 0]
-        (throw (str "bad phase " phase))))))
+        ;; we turn off the load of  month at start-up, there will be no phase
+        [0 0]))))
 
 (def month-progress (r/track month-progress-compute))
 

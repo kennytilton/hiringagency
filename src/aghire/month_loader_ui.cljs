@@ -9,15 +9,24 @@
 
 (defn month-selector []
   (into [:select.searchMonth
-         {:value     (or @loader/month-id "")
-          :on-change #(loader/month-load-initialize (utl/target-val %))}]
-    (map #(let [{:keys [hnId desc]} %]
-            [:option {:value hnId} desc])
-      (loader/gMonthlies-cljs))))
+         {:value       (or @loader/month-id "none")
+          :style (when-not @loader/month-id
+                   {:font-size "1em"
+                    :font-style "italic"})
+          :placeholder "Select a month"
+          :on-change   #(loader/month-load-initialize (utl/target-val %))}]
+    (concat
+      (do ;;when-not @loader/month-id
+        [[:option {:value    "none"
+                   :disabled "disabled"}
+           "select a month"]])
+      (map #(let [{:keys [hnId desc]} %]
+              [:option {:value hnId} desc])
+        (loader/gMonthlies-cljs)))))
 
 (defn hn-month-link []
   ;; An HN icon <a> tag linking to the actual HN page.
-  [utl/view-on-hn {}
+  [utl/view-on-hn {:style {:margin-right "9px"}}
    (pp/cl-format nil "https://news.ycombinator.com/item?id=~a" @loader/month-id)])
 
 (defn month-jobs-total []
@@ -37,8 +46,10 @@
   (fn []
     (let [;; load @loader/athings-to-jobs
           [phase max progress] @loader/month-progress]
-
-      [:div {:hidden (= phase :fini)}
+      (prn :pbar-pahse phase)
+      [:div {:hidden (or (nil? phase)
+                       (= phase :inactive)
+                       (= phase :fini))}
        [:span
         (case phase
           :cull-athings "Scrape nodes "
@@ -52,7 +63,7 @@
   [:div.pickAMonth
    [month-selector]
 
-   [:div {:style utl/hz-flex-wrap}
+   [:div {:style utl/hz-flex-wrap-centered}
     [hn-month-link]
     [month-jobs-total]
     [month-load-progress-bar]

@@ -79,7 +79,7 @@
 
 (defn init! []
   (sort/sort-initialize)
-  (unt/job-memos-load)
-  (mld/app-month-startup)
+  (unt/job-memos-load) ;; annotations of several kinds I make per story
+  (mld/app-month-startup) ;; load the latest month be default
 
   (mount-root))
