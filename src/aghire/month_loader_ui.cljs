@@ -7,6 +7,24 @@
     [cljs.pprint :as pp]
     [aghire.month-loader :as loader]))
 
+(declare month-selector hn-month-link month-jobs-total month-load-progress-bar)
+
+;;; --- The Month Picker -------------------------------
+;;; the user chooses which month to load into the app and
+;;; watches it load.
+
+(defn pick-a-month []
+  [:div.pickAMonth
+   [month-selector]
+
+   [:div {:style utl/hz-flex-wrap-centered}
+    [hn-month-link]
+    [month-jobs-total]
+    [month-load-progress-bar]
+    ]])
+
+;;; ---- the month select ---------------------------------
+
 (defn month-selector []
   (into [:select.searchMonth
          {:value       (or @loader/month-id "none")
@@ -24,6 +42,8 @@
               [:option {:value hnId} desc])
         (loader/gMonthlies-cljs)))))
 
+;;; --- a graphical link to the actual HN page -------------------
+
 (defn hn-month-link []
   ;; An HN icon <a> tag linking to the actual HN page.
   [utl/view-on-hn {:style {:margin-right "9px"}}
@@ -36,17 +56,15 @@
           :hidden (not (loader/month-load-fini))}
    (str "Total jobs: " (count @loader/month-jobs))])
 
-;;;; -------------------------------------------------------------------
-;;;; --- The star of the show ------------------------------------------
-;;;; -------------------------------------------------------------------
-;
+
+;;;; --- the progress bar ------------------------------------------
 
 (defn month-load-progress-bar []
 
   (fn []
     (let [;; load @loader/athings-to-jobs
           [phase max progress] @loader/month-progress]
-      (prn :pbar-pahse phase)
+
       [:div {:hidden (or (nil? phase)
                        (= phase :inactive)
                        (= phase :fini))}
@@ -58,13 +76,3 @@
        [:progress
         {:value progress
          :max   max}]])))
-
-(defn pick-a-month []
-  [:div.pickAMonth
-   [month-selector]
-
-   [:div {:style utl/hz-flex-wrap-centered}
-    [hn-month-link]
-    [month-jobs-total]
-    [month-load-progress-bar]
-    ]])

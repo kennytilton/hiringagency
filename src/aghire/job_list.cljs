@@ -58,7 +58,7 @@
              :style {:margin     "6px"
                      :background "#fff"
                      :display    (if deets "block" "none")}}
-       [unt/user-annotations job]
+       [unt/job-memo-control-bar job]
        (into [:div {:style           {:margin   "6px"
                                       :overflow "auto"}
                     :on-double-click #(jump-to-hn (:hn-id job))}]

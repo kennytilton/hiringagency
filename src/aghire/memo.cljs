@@ -7,7 +7,7 @@
     [aghire.db :as db]
     [reagent.core :as r]))
 
-;;; --- utilities -----------------------------------
+;;; --- utilities / persistence -------------------------
 
 (defn memo-ensure [job-id]
   (when-not (contains? (:job-memos @db/app) job-id)
@@ -40,11 +40,29 @@
   (reset! (app-cursor [:job-memos hn-id prop]) value)
   (memo-persist hn-id))
 
+;;; --- app init ---------------------------------------
+
 (defn job-memos-load []
   (swap! db/app assoc :job-memos
     (utl/ls-get-wild (str db/ls-key "-memo-"))))
 
-;;; --- the app ---------------------------------------
+;;; --- the memo interface -------------------------------
+(declare job-stars applied note-toggle exclude-job note-editor)
+;;; a control bar for annotating individual jobs
+
+(defn job-memo-control-bar []
+  (fn [job]
+    (let [note-editing? (r/atom false)]
+      [:div {:style {:display        "flex"
+                     :flex-direction "column"}}
+       [:div.userAnnotations
+        [job-stars job]
+        [applied job]
+        [note-toggle job note-editing?]
+        [exclude-job job]]
+       [note-editor job note-editing?]])))
+
+;;; individual controls follow......
 
 ;;; --- exclude ---------------------------------------
 
@@ -120,17 +138,5 @@
               :on-click #(swap! editing? not)}
        "Notes"])))
 
-;;; --- main ------------------------------------------------------
 
-(defn user-annotations []
-  (fn [job]
-    (let [note-editing? (r/atom false)]
-      [:div {:style {:display        "flex"
-                     :flex-direction "column"}}
-       [:div.userAnnotations
-        [job-stars job]
-        [applied job]
-        [note-toggle job note-editing?]
-        [exclude-job job]]
-       [note-editor job note-editing?]])))
 

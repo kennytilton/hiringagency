@@ -12,11 +12,60 @@
     [aghire.regex-ui :as rgxui]
     [aghire.filtering :as flt]))
 
+(declare mount-root landing-page  app-banner)
+
+;;; --- main ------------------------------------------------
+
+(defn init! []
+  (sort/sort-initialize)
+  (unt/job-memos-load) ;; annotations of several kinds I make per story
+  (mld/app-month-startup) ;; load the latest month be default
+
+  (mount-root))
+
+(defn mount-root []
+  (r/render [landing-page] (.getElementById js/document "app")))
+
 ;; -------------------------
 ;; Landing-page
 
+(defn landing-page []
+  [:div
+   [app-banner]
+   [:div {:style {:margin 0 :background "#ffb57d"}}
 
-(def appHelpEntry
+    ;; we default to the current month and let the user explore
+    ;; a couple of earlier months. Left as an exercise is loading
+    ;; all the months and not restricting search by month boundary.
+    [mlv/pick-a-month]
+
+    ;; A hidden iframe used to load HN pages for scraping.
+    ;; Left as an exercise is scraping once in a utility to
+    ;; generate EDN used by this app -- except HN has an
+    ;; API on the way that will elim scraping altogether!
+
+    [mld/job-listing-loader]
+
+    ;; the control panel...
+
+    [:div {:style {:background "#ffb57d"}}
+     [utl/open-shut-case :show-filters "Filters"
+      flt/mk-title-selects
+      flt/mk-user-selects]
+
+     [rgxui/mk-regex-search]
+
+     [sort/sort-bar]
+
+     [jlcb/job-listing-control-bar]]
+
+    ;; the jobs...
+    [jlst/job-list]]])
+
+;;; --- app help --------------------------------------------------------------
+;;; We sneak in the banner here instead of breaking it out into its own file.
+
+(def app-help-entry
   (map identity
     ["Click any job header to show or hide the full listing."
      "Double-click job description to open listing on HN in new tab."
@@ -41,45 +90,4 @@
         [:div.headermain
          [:span.askhn "Ask HN:"]
          [:span.who "Who Is Hiring?"]]]
-       [utl/help-list appHelpEntry helping]])))
-
-(defn main-panel []
-  [:div
-   [app-banner]
-   [:div {:style {:margin 0 :background "#ffb57d"}}
-
-    ;; we default to the current month and let user explore
-    ;; a couple of earlier months. Left as an exercise is loading
-    ;; all the months and not restricting search by month boundary.
-    [mlv/pick-a-month]
-
-    ;; a hidden iframe used to load HN pages for scraping
-    [mld/job-listing-loader]
-
-    ;; the control panel
-    [:div {:style {:background "#ffb57d"}}
-     [utl/open-shut-case :show-filters "Filters"
-      flt/mk-title-selects
-      flt/mk-user-selects]
-
-     [rgxui/mk-regex-search]
-
-     [sort/sort-bar]
-
-     [jlcb/job-listing-control-bar]]
-
-    ;; the jobs...
-    [jlst/job-list]]])
-
-;; -------------------------
-;; Initialize app
-
-(defn mount-root []
-  (r/render [main-panel] (.getElementById js/document "app")))
-
-(defn init! []
-  (sort/sort-initialize)
-  (unt/job-memos-load) ;; annotations of several kinds I make per story
-  (mld/app-month-startup) ;; load the latest month be default
-
-  (mount-root))
+       [utl/help-list app-help-entry helping]])))

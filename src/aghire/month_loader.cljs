@@ -112,7 +112,6 @@
     [:div {:style {:display "none"}}
      (let [task @month-load]
        (when (seq (:page-urls-remaining task))
-         (println :mk-pg-loader-for (:page-urls-remaining task))
          [mk-page-loader task]))]))
 
 ;;; --- getting aThings from pages ------------------------------------

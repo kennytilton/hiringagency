@@ -1,6 +1,24 @@
 (ns aghire.job-parse
   (:require [clojure.string :as str]))
 
+(declare job-parse-extend)
+
+(def dbg (atom false))
+
+(defn job-parse
+  "The top-level function that takes a dom node and
+  tries to extract a job spec to drive the rest of
+  the app. Note that no job results unless the parser
+  marks :OK as true."
+  [dom seen]
+  (when-not (contains? seen (.-id dom))
+    (let [spec (atom {:hn-id (.-id dom)})]
+      ;;; sometimes native dom functions return funky arrays. prim-seq converts those for CLJS
+      (doseq [child (prim-seq (.-children dom))]
+        (job-parse-extend spec child))
+      (if (:OK @spec)
+        @spec))))
+
 ;;; key regexs used to decide job attributes for search filters
 
 (def internOK (js/RegExp. "internship|intern" "i"))
@@ -18,6 +36,7 @@
   [spec dom]
 
   (let [cn (.-className dom)]
+    (when @dbg (prn :cn! cn))
     (when (some #{cn} ["c5a" "cae" "c00" "c9c" "cdd" "c73" "c88"])
       (when-let [rs (.getElementsByClassName dom "reply")]
         (map (fn [e] (.remove e)) (prim-seq rs)))
@@ -27,10 +46,12 @@
         ;; pre-digest all nodes
         (swap! spec assoc :body [])                         ;; needed?
         (if (and (= 3 (.-nodeType c0))
-                 (< 1 (count (filter #{\|} (.-textContent c0)))))
+                 (pos? (count (filter #{\|} (.-textContent c0)))))
 
           (let [s (atom {:in-header true
                          :title-seg []})]
+            (when @dbg
+              (prn :made-y!!!!! (.-nodeType c0)))
             (doseq [n (prim-seq child)]
               (if (:in-header @s)
                 (if (and (= 1 (.-nodeType n))
@@ -69,19 +90,7 @@
       (doseq [child (prim-seq (.-children dom))]
         (job-parse-extend spec child)))))
 
-(defn job-parse
-  "The top-level function that takes a dom node and
-  tries to extract a job spec to drive the rest of
-  the app. Note that no job results unless the parser
-  marks :OK as true."
-  [dom seen]
-  (when-not (contains? seen (.-id dom))
-    (let [spec (atom {:hn-id (.-id dom)})]
-      ;;; sometimes native dom functions return funky arrays. prim-seq converts those for CLJS
-      (doseq [child (prim-seq (.-children dom))]
-        (job-parse-extend spec child))
-      (when (:OK @spec)
-        @spec))))
+
 
 
 
