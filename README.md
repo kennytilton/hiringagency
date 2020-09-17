@@ -58,4 +58,4 @@ Figwheel will automatically push cljs changes to the browser.
 
 Wait a bit, then browse to [http://localhost:3449](http://localhost:3449).
 
-Contact @hiskennyness on Slack #Clojurians or raise an issue here if you have problems, question, or comments.
+Contact @maverick on Slack #Clojurians or raise an issue here if you have problems, question, or comments.
